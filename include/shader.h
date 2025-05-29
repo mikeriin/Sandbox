@@ -47,6 +47,7 @@ namespace mk
 
 
 		void SetVec3(const char* location, const glm::vec3& v) const;
+		void SetTexture(const char* location, int unit);
 
 
 	private:

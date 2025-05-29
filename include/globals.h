@@ -23,7 +23,7 @@ constexpr uint32_t MK_VOXEL_AO_SHIFT								= 0;
 
 constexpr float MK_CAMERA_SENSITIVITY_X							= 0.45f;
 constexpr float MK_CAMERA_SENSITIVITY_Y							= 0.4f;
-constexpr float MK_CAMERA_SPEED											= 50.0f;
+constexpr float MK_CAMERA_SPEED											= 20.0f;
 constexpr float MK_CAMERA_ROTATION_SMOOTHING_SPEED	= 40.0f;
 constexpr auto MK_CAMERA_MODE_FREE_LOOK							= 0x00000003;
 constexpr auto MK_CAMERA_MODE_CLASSIC								= 0x00000004;

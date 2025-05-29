@@ -13,6 +13,8 @@
 #include <glad/glad.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include "globals.h"
 #include "window.h"
@@ -70,6 +72,44 @@ int main(int argc, char* argv[])
 	program.Create(programInfo);
 	program.Use();
 	/* ---------- !SHADERS ---------- */
+
+
+	/* ---------- TEXTURES MANAGEMENT ---------- */
+
+	int width, height, channels;
+	stbi_set_flip_vertically_on_load(true);
+
+	uint8_t* pixels = stbi_load("assets/textures/blocks/stone.png", &width, &height, &channels, STBI_rgb_alpha);
+	if (!pixels)
+	{
+		std::cerr << "Failed to load texture\n";
+		return -1;
+	}
+
+
+	uint32_t tex;
+	int mipLevels = (int)std::floor(std::log2(std::max(width, height))) + 1;
+	glCreateTextures(GL_TEXTURE_2D, 1, &tex);
+	glTextureStorage2D(tex, mipLevels, GL_RGBA8, width, height);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glTextureSubImage2D(tex, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+	glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glGenerateTextureMipmap(tex);
+
+	stbi_image_free(pixels);
+
+	int unit = 0;
+	glBindTextureUnit(unit, tex);
+
+	program.SetTexture("u_Tex", unit);
+
+	/* ---------- !TEXTURES MANAGEMENT ---------- */
 
 
 	/* ---------- WORLD GENERATION ---------- */

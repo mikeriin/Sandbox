@@ -10,6 +10,9 @@ layout(location = 3) in vec2 inUV;
 layout(location = 4) smooth in vec3 inViewPosition;
 
 
+uniform sampler2D u_Tex;
+
+
 const vec3 ambientColor = vec3(0.675, 0.529, 0.773);
 const float ambientStrength = 0.25;
 const vec3 sunlightColor = vec3(0.992, 0.984, 0.827);
@@ -18,9 +21,9 @@ const vec3 sunlightDirection = vec3(0.3618, 0.9044, 0.2261);
 const vec3 color = vec3(0.95);
 
 
-vec3 fogColor = vec3(0.459, 0.416, 0.714);
-float fogDensity = 0.005;
-int fogPower = 5;
+const vec3 fogColor = vec3(0.459, 0.416, 0.714);
+const float fogDensity = 0.005;
+const int fogPower = 5;
 
 
 void main()
@@ -47,7 +50,10 @@ void main()
 	float fog = clamp(1.0 - fogFactor, 0.0, 1.0);
 
 
-	vec3 finalColor = mix(sqrt(lit) * color, inPos / 32, 0.25);
+	//vec3 finalColor = mix(sqrt(lit) * color, inPos / 32, 0.25);
+
+	vec4 diffuseTex = texture(u_Tex, inUV);
+	vec3 finalColor = sqrt(lit) * diffuseTex.rgb;
 
 	FragColor = vec4(mix(finalColor, fogColor, fog), 1.0);
 }

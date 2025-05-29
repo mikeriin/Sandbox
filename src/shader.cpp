@@ -73,6 +73,11 @@ namespace mk
 		glUniform3fv(glGetUniformLocation(m_id, location), 1, &v[0]);
 	}
 
+	void ShaderProgram::SetTexture(const char* location, int unit)
+	{
+		glUniform1i(glGetUniformLocation(m_id, location), unit);
+	}
+
 	std::string ShaderProgram::readFile(const std::string& filepath) const
 	{
 		std::ifstream shaderFile(filepath);
