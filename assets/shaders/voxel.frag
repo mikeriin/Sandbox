@@ -8,6 +8,7 @@ layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec3 inPos;
 layout(location = 3) in vec2 inUV;
 layout(location = 4) smooth in vec3 inViewPosition;
+layout(location = 5) flat in int inType;
 
 
 uniform sampler2D u_Tex;
@@ -50,10 +51,17 @@ void main()
 	float fog = clamp(1.0 - fogFactor, 0.0, 1.0);
 
 
-	//vec3 finalColor = mix(sqrt(lit) * color, inPos / 32, 0.25);
+	int tileX = inType % 16;
+	int tileY = inType / 16;
 
-	vec4 diffuseTex = texture(u_Tex, inUV);
+	int pixelX = tileX * 16;
+	int pixelY = tileY * 16;
+
+	float uvX = (pixelX / 256.0) + (inUV.x / 16);
+	float uvY = (pixelY / 256.0) + (inUV.y / 16);
+
+	vec4 diffuseTex = texture(u_Tex, vec2(uvX, uvY));
 	vec3 finalColor = sqrt(lit) * diffuseTex.rgb;
 
-	FragColor = vec4(mix(finalColor, fogColor, fog), 1.0);
+	FragColor = vec4(mix(finalColor, fogColor, fog), diffuseTex.a);
 }

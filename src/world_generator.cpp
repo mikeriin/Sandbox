@@ -5,6 +5,9 @@
 #include <cmath>
 #include <algorithm>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <gtx/norm.hpp>
+
 #include "globals.h"
 #include "voxel_chunk.h"
 
@@ -142,10 +145,7 @@ namespace mk
         int dy = std::abs(pos.y - m_cameraChunkPos.y);
         int dz = std::abs(pos.z - m_cameraChunkPos.z);
 
-        if (dx > MK_VOXEL_CHUNK_RENDER_DIST ||
-          dy > MK_VOXEL_CHUNK_RENDER_DIST_Y ||
-          dz > MK_VOXEL_CHUNK_RENDER_DIST ||
-          glm::length(glm::vec3(dx, dy, dz)) > (float)MK_VOXEL_CHUNK_RENDER_DIST)
+        if (glm::length2(glm::vec3(dx, dy, dz)) > MK_VOXEL_CHUNK_RENDER_DIST * MK_VOXEL_CHUNK_RENDER_DIST)
           toRemove.push_back(pos);
       }
 

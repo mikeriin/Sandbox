@@ -6,6 +6,8 @@
 
 #include <FastNoiseLite.h>
 
+#include "aabb.h"
+
 
 namespace mk
 {
@@ -19,12 +21,12 @@ namespace mk
 		m_seed = voxChunkInfo.seed;
 		m_chunkPosition = voxChunkInfo.chunkPosition;
 
-		m_datas.resize(MK_VOXEL_CHUNK_BOUND * MK_VOXEL_CHUNK_BOUND * MK_VOXEL_CHUNK_BOUND, false);
+		m_datas.resize(MK_VOXEL_CHUNK_BOUND * MK_VOXEL_CHUNK_BOUND * MK_VOXEL_CHUNK_BOUND, mk::BlockType::Air);
 
 		FastNoiseLite heightNoiseFunc;
 		heightNoiseFunc.SetSeed(m_seed);
 		heightNoiseFunc.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-		heightNoiseFunc.SetFrequency(0.002f);
+		heightNoiseFunc.SetFrequency(0.001f);
 
 		FastNoiseLite veinNoiseFunc;
 		veinNoiseFunc.SetSeed(m_seed + 42);
@@ -89,7 +91,10 @@ namespace mk
 					frequency *= lacunarity;
 				}
 				total /= maxAmplitude;
-				total = std::pow(total, 4.0f);
+
+				float totalPow = std::lerp(0.75f, 3.0f, total);
+
+				total = std::pow(total, totalPow);
 
 				int surfaceHeight = (int)(std::floor(total * MK_VOXEL_CHUNK_MAX_GEN_HEIGHT) + MK_VOXEL_CHUNK_PLAIN_HEIGHT);
 				int localHeight = surfaceHeight - m_chunkPosition.y * (int)MK_VOXEL_CHUNK_SIZE;
@@ -98,7 +103,8 @@ namespace mk
 
 				for (uint8_t y = 0; y < end; y++)
 				{
-					float depth = std::max(0.0f, -((float)worldPosition.y + y));
+					int worldY = worldPosition.y + y;
+					float depth = std::max(0.0f, -(float)worldY);
 					constexpr float MAX_DEPTH = 32.0f;
 					float heightRatio = std::clamp(depth / MAX_DEPTH, 0.0f, 1.0f);
 
@@ -122,7 +128,37 @@ namespace mk
 					if (finalCave > veinThreshold) continue;
 
 					if (m_empty) m_empty = false;
-					m_datas[GetIndex(x, y, z)] = true;
+
+					if (worldY < MK_VOXEL_CHUNK_PLAIN_HEIGHT)
+					{
+						m_datas[GetIndex(x, y, z)] = mk::BlockType::Stone;
+					}
+					else
+					{
+						if (total > 0.5f && caveNoise01 > 0.5f)
+						{
+							m_datas[GetIndex(x, y, z)] = mk::BlockType::Snow;
+						}
+						else if (total > 0.5f && caveNoise01 > 0.2f)
+						{
+							m_datas[GetIndex(x, y, z)] = mk::BlockType::Stone;
+						}
+						else
+						{
+							if (y == end - 1)
+							{
+								m_datas[GetIndex(x, y, z)] = mk::BlockType::Grass;
+							}
+							else if (y < end - 1 && y >= end - 4)
+							{
+								m_datas[GetIndex(x, y, z)] = mk::BlockType::Dirt;
+							}
+							else
+							{
+								m_datas[GetIndex(x, y, z)] = mk::BlockType::Stone;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -140,7 +176,7 @@ namespace mk
 				|| pos.z < 0 || pos.z >= MK_VOXEL_CHUNK_BOUND
 			) return false;
 
-			return m_datas[GetIndex(pos)];
+			return m_datas[GetIndex(pos)] != mk::BlockType::Air;
 			};
 
 
@@ -173,7 +209,7 @@ namespace mk
 						if (neighboor) continue;
 
 						uint32_t base = (uint32_t)vertices.size();
-						mk::VoxelFace face = mk::CreateFace(realPos, (mk::FaceDirection)normal, glm::ivec2(1));
+						mk::VoxelFace face = mk::CreateFace(realPos, (mk::FaceDirection)normal, glm::ivec2(1), m_datas[GetIndex(x, y, z)]);
 						int aos[4]{};
 
 						// 4 corners
@@ -191,11 +227,12 @@ namespace mk
 							uint8_t u = mk::GetVoxelU(face[index]);
 							uint8_t v = mk::GetVoxelV(face[index]);
 							uint8_t ao = 0;
+							uint8_t type = mk::GetVoxelBlockType(face[index]);
 
 							if (side1 && side2) ao = 3;
 							else ao += side1 + side2 + corner;
 
-							face[index].packedB = mk::PackUVExtentAndAO(u, v, ao);
+							face[index].packedB = mk::PackTypeUVExtentAndAO(type, u, v, ao);
 
 							aos[index] = ao;
 						}
@@ -223,11 +260,15 @@ namespace mk
 			}
 		}
 
+		mk::AABB aabb{};
+		aabb.min = glm::vec3(m_chunkPosition) * (float)MK_VOXEL_CHUNK_SIZE;
+		aabb.max = aabb.min + glm::vec3(MK_VOXEL_CHUNK_SIZE);
 
 
 		mk::VoxelMeshCreateInfo voxMeshInfo{};
 		voxMeshInfo.vertices = vertices;
 		voxMeshInfo.indices = indices;
+		voxMeshInfo.aabb = aabb;
 
 		return voxMeshInfo;
 	}

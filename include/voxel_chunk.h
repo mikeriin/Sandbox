@@ -1,5 +1,5 @@
-#ifndef MK_VOXEL_CHUNK
-#define MK_VOXEL_CHUNK
+#ifndef MK_VOXEL_CHUNK_H
+#define MK_VOXEL_CHUNK_H
 
 
 #include <vector>
@@ -10,6 +10,7 @@
 
 #include "voxel.h"
 #include "voxel_mesh.h"
+#include "block_type.h"
 
 
 
@@ -38,7 +39,7 @@ namespace mk
 	private:
 		int m_seed = 0;
 		glm::ivec3 m_chunkPosition = {};
-		std::vector<bool> m_datas = {};
+		std::vector<mk::BlockType> m_datas = {};
 		bool m_empty = true;
 
 
@@ -69,4 +70,4 @@ namespace mk
 
 
 
-#endif // !MK_VOXEL_CHUNK
+#endif // !MK_VOXEL_CHUNK_H

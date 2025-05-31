@@ -10,6 +10,7 @@
 #include "buffer.h"
 #include "vertex_array.h"
 #include "voxel.h"
+#include "aabb.h"
 
 
 
@@ -21,6 +22,7 @@ namespace mk
 	{
 		std::vector<mk::Voxel> vertices;
 		std::vector<uint32_t> indices;
+		mk::AABB aabb;
 	};
 
 
@@ -30,6 +32,7 @@ namespace mk
 	private:
 		std::vector<mk::Voxel> m_vertices = {};
 		std::vector<uint32_t> m_indices = {};
+		mk::AABB m_aabb = {};
 		mk::Buffer m_vbo = {};
 		mk::Buffer m_ebo = {};
 		mk::VertexArray m_vao = {};
@@ -54,6 +57,8 @@ namespace mk
 
 		inline std::vector<uint32_t>& GetIndices() { return m_indices; }
 		inline const std::vector<uint32_t>& GetIndices() const { return m_indices; }
+
+		inline const mk::AABB& GetAABB() const { return m_aabb; }
 
 	private:
 		void initGPU();

@@ -4,10 +4,12 @@
 #define Y_SHIFT			9u
 #define Z_SHIFT			3u
 #define NORM_SHIFT	0u
+#define TYPE_SHIFT	15u
 #define U_SHIFT			9u
 #define V_SHIFT			3u
 #define AO_SHIFT		0u
 
+#define MASK_8_BITS 0xFFu
 #define MASK_6_BITS 0x3Fu
 #define MASK_3_BITS 0x7u
 
@@ -19,6 +21,7 @@ layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec3 outPos;
 layout(location = 3) out vec2 outUV;
 layout(location = 4) smooth out vec3 outViewPosition;
+layout(location = 5) flat out int outType;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -56,6 +59,11 @@ vec3 GetVertexNormal(uint voxel)
 }
 
 // packedB
+uint GetVertexType(uint voxel)
+{
+	return (voxel >> TYPE_SHIFT) & MASK_8_BITS;
+}
+
 vec2 GetVertexUV(uint voxel)
 {
 	return vec2(
@@ -68,6 +76,8 @@ uint GetVertexAO(uint voxel)
 {
 	return (voxel >> AO_SHIFT) & MASK_3_BITS;
 }
+
+
 
 
 mat4 model = mat4(1.0);
@@ -87,4 +97,5 @@ void main()
 	outNormal = GetVertexNormal(a_VoxelPackedA);
 	outPos = GetVertexPosition(a_VoxelPackedA);
 	outUV = GetVertexUV(a_VoxelPackedB);
+	outType = int(GetVertexType(a_VoxelPackedB));
 }

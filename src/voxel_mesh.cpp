@@ -28,6 +28,7 @@ namespace mk
 	{
 		m_vertices = voxMeshInfo.vertices;
 		m_indices = voxMeshInfo.indices;
+		m_aabb = voxMeshInfo.aabb;
 
 		initGPU();
 

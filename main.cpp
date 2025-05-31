@@ -29,6 +29,7 @@
 #include "voxel_mesh.h"
 #include "voxel_chunk.h"
 #include "world_generator.h"
+#include "texture.h"
 
 
 int mk::seed = 0;
@@ -76,38 +77,22 @@ int main(int argc, char* argv[])
 
 	/* ---------- TEXTURES MANAGEMENT ---------- */
 
-	int width, height, channels;
-	stbi_set_flip_vertically_on_load(true);
 
-	uint8_t* pixels = stbi_load("assets/textures/blocks/stone.png", &width, &height, &channels, STBI_rgb_alpha);
-	if (!pixels)
-	{
-		std::cerr << "Failed to load texture\n";
-		return -1;
-	}
+	std::array<mk::TextureParameters, 4> params{};
+	params[0] = { GL_TEXTURE_WRAP_S, GL_NEAREST };
+	params[1] = { GL_TEXTURE_WRAP_T, GL_NEAREST };
+	params[2] = { GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST };
+	params[2] = { GL_TEXTURE_MAG_FILTER, GL_NEAREST };
 
+	mk::TextureCreateInfo texInfo{};
+	texInfo.texturePath = "assets/textures/blocks/terrain_atlas.png";
+	texInfo.unit = 0;
+	texInfo.paramCount = static_cast<uint32_t>(params.size());
+	texInfo.pParams = params.data();
 
-	uint32_t tex;
-	int mipLevels = (int)std::floor(std::log2(std::max(width, height))) + 1;
-	glCreateTextures(GL_TEXTURE_2D, 1, &tex);
-	glTextureStorage2D(tex, mipLevels, GL_RGBA8, width, height);
+	mk::Texture tex0;
+	tex0.Create(texInfo);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	glTextureSubImage2D(tex, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-	glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-	glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glGenerateTextureMipmap(tex);
-
-	stbi_image_free(pixels);
-
-	int unit = 0;
-	glBindTextureUnit(unit, tex);
-
-	program.SetTexture("u_Tex", unit);
 
 	/* ---------- !TEXTURES MANAGEMENT ---------- */
 
@@ -124,8 +109,8 @@ int main(int argc, char* argv[])
 
 	/* ---------- CAMERA ---------- */
 	mk::CameraCreateInfo camInfo{};
-	camInfo.position = glm::vec3(0.0);
-	//camInfo.position = glm::vec3(0.0, (float)MK_VOXEL_CHUNK_MAX_GEN_HEIGHT, 0.0);
+	//camInfo.position = glm::vec3(0.0);
+	camInfo.position = glm::vec3(0.0, (float)MK_VOXEL_CHUNK_MAX_GEN_HEIGHT, 0.0);
 	camInfo.fov = 75.0f;
 	camInfo.aspectRatio = window.GetExtent().x / window.GetExtent().y;
 	camInfo.nearPlane = 0.01f;
@@ -218,10 +203,9 @@ int main(int argc, char* argv[])
 
 			for (const auto& [pos, mesh] : worldGen.GetChunks())
 			{
-				glm::vec3 min = glm::vec3(pos) * (float)MK_VOXEL_CHUNK_SIZE;
-				glm::vec3 max = min + glm::vec3((float)MK_VOXEL_CHUNK_SIZE);
+				auto chunkAABB = mesh->GetAABB();
 
-				if (!mainCamFrustum.IntersectsAABB(min, max)) continue;
+				if (!mainCamFrustum.IntersectsAABB(chunkAABB.min, chunkAABB.max)) continue;
 
 				chunkMeshesToRender.insert_or_assign(pos, mesh);
 			}
@@ -232,6 +216,8 @@ int main(int argc, char* argv[])
 		/* ---------- DRAW ---------- */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		program.Use();
+		tex0.Bind();
+		program.SetTexture("u_Tex", tex0.GetUnit());
 
 		for (const auto& [pos, mesh] : chunkMeshesToRender)
 		{

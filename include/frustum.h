@@ -1,5 +1,5 @@
-#ifndef MK_FRUSTUM
-#define MK_FRUSTUM
+#ifndef MK_FRUSTUM_H
+#define MK_FRUSTUM_H
 
 
 
@@ -90,4 +90,4 @@ namespace mk
 
 
 
-#endif // !MK_FRUSTUM
+#endif // !MK_FRUSTUM_H

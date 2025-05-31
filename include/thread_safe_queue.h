@@ -1,5 +1,5 @@
-#ifndef MK_THREAD_SAFE_QUEUE
-#define MK_THREAD_SAFE_QUEUE
+#ifndef MK_THREAD_SAFE_QUEUE_H
+#define MK_THREAD_SAFE_QUEUE_H
 
 
 #include <queue>
@@ -78,4 +78,4 @@ namespace mk
 
 
 
-#endif // !MK_THREAD_SAFE_QUEUE
+#endif // !MK_THREAD_SAFE_QUEUE_H

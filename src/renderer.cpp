@@ -100,6 +100,9 @@ namespace mk
       glDebugMessageCallback(glDebugOutput, nullptr);
       glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
+      const char* glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+      std::cout << std::format("OpenGL version {}\n", glVersion);
+
 #endif // !NDEBUG
 
       glEnable(GL_DEPTH_TEST);
@@ -110,12 +113,6 @@ namespace mk
 
 			break;
 		}
-
-		
-#ifndef NDEBUG
-		const char* glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-		std::cout << std::format("OpenGL version {}\n", glVersion);
-#endif // !NDEBUG
 
 
 		return true;

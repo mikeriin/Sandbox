@@ -1,5 +1,5 @@
-#ifndef MK_WORLD_GENERATOR
-#define MK_WORLD_GENERATOR
+#ifndef MK_WORLD_GENERATOR_H
+#define MK_WORLD_GENERATOR_H
 
 
 #include <thread>
@@ -47,6 +47,7 @@ namespace mk
 	{
 		glm::ivec3 chunkPosition;
 		mk::VoxelMeshCreateInfo meshInfo;
+		mk::AABB aabb;
 	};
 
 
@@ -89,4 +90,4 @@ namespace mk
 
 
 
-#endif // !MK_WORLD_GENERATOR
+#endif // !MK_WORLD_GENERATOR_H

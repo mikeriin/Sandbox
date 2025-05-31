@@ -172,8 +172,11 @@
     <ClCompile Include="src\window.cpp" />
     <ClCompile Include="src\vertex_array.cpp" />
     <ClCompile Include="src\world_generator.cpp" />
+    <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\aabb.h" />
+    <ClInclude Include="include\block_type.h" />
     <ClInclude Include="include\thread_safe_queue.h" />
     <ClInclude Include="include\voxel_chunk.h" />
     <ClInclude Include="include\camera.h" />
@@ -188,6 +191,7 @@
     <ClInclude Include="include\vertex_array.h" />
     <ClInclude Include="include\voxel_mesh.h" />
     <ClInclude Include="include\world_generator.h" />
+    <ClInclude Include="include\texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
